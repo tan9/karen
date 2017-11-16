@@ -10,11 +10,13 @@ import android.content.Context
 import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.content.IntentFilter
 
 class MainActivity : AppCompatActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private lateinit var receiver: PhoneStatReceiver
 
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -34,6 +36,15 @@ class MainActivity : AppCompatActivity() {
                         Manifest.permission.CALL_PHONE,
                         Manifest.permission.SEND_SMS),
                 PERMISSION_READ_STATE)
+
+        val filter = IntentFilter("android.intent.action.PHONE_STATE")
+        receiver = PhoneStatReceiver()
+        registerReceiver(receiver, filter)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterReceiver(receiver)
     }
 
     override fun onRequestPermissionsResult(requestCode: Int,
