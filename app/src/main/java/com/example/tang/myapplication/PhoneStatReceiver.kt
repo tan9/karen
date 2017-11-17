@@ -1,7 +1,6 @@
 package com.example.tang.myapplication
 
-import com.android.internal.telephony.ITelephony
-
+import android.app.PendingIntent
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -10,6 +9,7 @@ import android.telephony.SmsManager
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.widget.Toast
+import com.android.internal.telephony.ITelephony
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -32,7 +32,7 @@ class PhoneStatReceiver : BroadcastReceiver() {
                     editor.putString(System.currentTimeMillis().toString(), processLogMessage)
                     editor.apply()
 
-                    val message = "您好，我是虛擬助理小米，現在因為櫃台忙碌中或非營業時間，有任何問題都可以到　https://cht.services/wangsteak-bot/ 由我為您服務喔!"
+                    val message = "您好，我是虛擬助理小米，有任何問題都可以到 https://cht.services/wangsteak-bot/ 由我為您服務喔!"
                     sendSms(number, message, context)
                     endCall(telephonyManager)
                 }
@@ -48,10 +48,13 @@ class PhoneStatReceiver : BroadcastReceiver() {
     private fun shouldProcess(incomingNumber: String?): Boolean =
             true
 
-    private fun sendSms(phoneNo: String, msg: String, context: Context) {
+    private fun sendSms(phoneNo: String, message: String, context: Context) {
         try {
             val smsManager = SmsManager.getDefault()
-            smsManager.sendTextMessage(phoneNo, null, msg, null, null)
+
+            val pendingIntent = PendingIntent.getBroadcast(context, 0, Intent("SMS_SENT"), 0)
+
+            smsManager.sendTextMessage(phoneNo, null, message, pendingIntent, null)
             Toast.makeText(context, "Message Sent.", Toast.LENGTH_LONG).show()
 
         } catch (e: Exception) {
