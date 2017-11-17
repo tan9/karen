@@ -28,11 +28,12 @@ class PhoneStatReceiver : BroadcastReceiver() {
                     val editor = sharedPreferences.edit()
 
                     val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US)
-                    val message = "\uD83D\uDC67\uD83C\uDFFB " + number + " @ " + dateFormat.format(Date())
-                    editor.putString(System.currentTimeMillis().toString(), message)
+                    val processLogMessage = "\uD83D\uDC67\uD83C\uDFFB " + number + " @ " + dateFormat.format(Date())
+                    editor.putString(System.currentTimeMillis().toString(), processLogMessage)
                     editor.apply()
 
-                    sendSms(number, "沒有人能幫你喔，請連到 http://www.google.com/ 自已想辦法。", context)
+                    val message = "您好，我是虛擬助理小米，現在因為櫃台忙碌中或非營業時間，有任何問題都可以到　https://cht.services/wangsteak-bot/ 由我為您服務喔!"
+                    sendSms(number, message, context)
                     endCall(telephonyManager)
                 }
             }
