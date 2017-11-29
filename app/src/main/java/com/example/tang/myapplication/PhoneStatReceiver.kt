@@ -57,8 +57,12 @@ class PhoneStatReceiver : BroadcastReceiver() {
     }
 
     private fun getHostId(context: Context): String {
-        var manager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        return manager.line1Number
+        val manager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        var hostId = manager.line1Number
+        if (hostId == null) {
+            hostId = manager.subscriberId
+        }
+        return hostId
     }
 
     private fun shouldProcess(incomingNumber: String?): Boolean =
