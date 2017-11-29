@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config>
+        <domain includeSubdomains="true">cht.services</domain>
+        <trust-anchors>
+            <certificates src="@raw/dst_root_ca_x3"/>
+            <certificates src="@raw/lets_encrypt_x3_cross_signed"/>
+            <certificates src="@raw/lets_encrypt_x4_cross_signed"/>
+        </trust-anchors>
+    </domain-config>
+</network-security-config>
