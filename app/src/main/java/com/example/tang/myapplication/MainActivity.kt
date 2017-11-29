@@ -31,9 +31,10 @@ class MainActivity : AppCompatActivity() {
         lv.adapter = adapter
 
         ActivityCompat.requestPermissions(this,
-                arrayOf(Manifest.permission.READ_PHONE_STATE,
+                arrayOf(Manifest.permission.CALL_PHONE,
+                        Manifest.permission.INTERNET,
                         Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.CALL_PHONE,
+                        Manifest.permission.READ_PHONE_STATE,
                         Manifest.permission.SEND_SMS),
                 PERMISSION_READ_STATE)
 

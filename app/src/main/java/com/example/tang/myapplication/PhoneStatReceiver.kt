@@ -10,6 +10,7 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import android.widget.Toast
 import com.android.internal.telephony.ITelephony
+import com.example.tang.myapplication.service.ChatroomService
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,16 +25,27 @@ class PhoneStatReceiver : BroadcastReceiver() {
                 val number = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER)
                 Log.v(_TAG, "Incoming number: " + number)
                 if (shouldProcess(number)) {
+                    var processLogMessage = try {
+                        val chatroomService = ChatroomService()
+                        val sessionId = chatroomService.createSession(getHostId(context), number)
+
+                        // 網址會超過簡訊長度，目前只好先分兩則送了
+                        sendSms(number, "抱歉，現在無法接聽您的電話，我是虛擬助理小米，有任何問題都可以找我喔。請到:", context)
+                        sendSms(number, "https://room.cht.services/$sessionId", context)
+
+                        val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US)
+                        "\uD83D\uDC67\uD83C\uDFFB " + number + " @ " + dateFormat.format(Date())
+
+                    } catch (e: Exception) {
+                        Log.e(_TAG, "Failed to handle call.", e)
+                        "Error: ${e.message}"
+                    }
+
                     val sharedPreferences = context.getSharedPreferences("handled_incoming_calls", Context.MODE_PRIVATE)
                     val editor = sharedPreferences.edit()
-
-                    val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US)
-                    val processLogMessage = "\uD83D\uDC67\uD83C\uDFFB " + number + " @ " + dateFormat.format(Date())
                     editor.putString(System.currentTimeMillis().toString(), processLogMessage)
                     editor.apply()
 
-                    val message = "您好，我是虛擬助理小米，有任何問題都可以到 https://cht.services/wangsteak-bot/ 由我為您服務喔!"
-                    sendSms(number, message, context)
                     endCall(telephonyManager)
                 }
             }
@@ -42,7 +54,11 @@ class PhoneStatReceiver : BroadcastReceiver() {
             TelephonyManager.CALL_STATE_IDLE -> {
             }
         }
+    }
 
+    private fun getHostId(context: Context): String {
+        var manager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        return manager.line1Number
     }
 
     private fun shouldProcess(incomingNumber: String?): Boolean =
