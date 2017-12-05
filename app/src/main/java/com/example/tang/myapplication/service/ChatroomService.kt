@@ -1,11 +1,13 @@
 package com.example.tang.myapplication.service
 
+import android.util.Log
+import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.android.core.Json
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
-import com.github.kittinunf.fuel.httpPost
+import org.json.JSONObject
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -23,24 +25,42 @@ class ChatroomService {
         var data: Json? = null
         var error: FuelError? = null
 
-        pool.submit(
-                {
-                    val (req, res, result) = "https://cht.services/chat/api/sessions".httpPost(
-                            listOf("host" to hostId, "visitor" to visitorId)
-                    ).responseJson()
+        pool.submit({
+            val (req, res, result) =
+                    Fuel.post("https://cht.services/chat/api/sessions")
+                            .header("Content-Type" to "application/json")
+                            .body(JSONObject(listOf("host" to hostId, "visitor" to visitorId).toMap()).toString())
+                            .responseJson()
 
-                    val (d, e) = result
-                    data = d
-                    error = e
+            val (d, e) = result
+            data = d
+            error = e
 
-                    request = req
-                    response = res
+            request = req
+            Log.d("chatroom", request.toString())
+            response = res
+            Log.d("chatroom", response.toString())
 
-                    lock.countDown()
-                })
+            lock.countDown()
+        })
 
         lock.await(10, TimeUnit.SECONDS)
 
-        return data!!.obj()["sessionId"] as String
+        if (error != null) {
+            // FIXME 媽的，醜到爆...真 Kotlin 或是 Fuel 到底該怎麼寫??
+            var message: String? = null
+            if (data != null && data?.obj() != null) {
+                message = data!!.obj()["detail"] as String
+            }
+            if (message == null && response != null) {
+                if (response?.data != null) {
+                    val json = Json(response!!.data.toString(Charsets.UTF_8)).obj()
+                    message = json.optString("detail", json.optString("title", "Failed to create session.")) as String
+                }
+            }
+            throw RuntimeException(message, error)
+        } else {
+            return data!!.obj()["sessionId"] as String
+        }
     }
 }

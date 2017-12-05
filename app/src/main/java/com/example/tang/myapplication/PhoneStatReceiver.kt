@@ -34,11 +34,12 @@ class PhoneStatReceiver : BroadcastReceiver() {
                         sendSms(number, "https://room.cht.services/$sessionId", context)
 
                         val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US)
-                        "\uD83D\uDC67\uD83C\uDFFB " + number + " @ " + dateFormat.format(Date())
+                        "\uD83D\uDC67\uD83C\uDFFB $number @ ${dateFormat.format(Date())}"
 
                     } catch (e: Exception) {
                         Log.e(_TAG, "Failed to handle call.", e)
-                        "Error: ${e.message}"
+                        val dateFormat = SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US)
+                        "\uD83D\uDE2B $number @ ${dateFormat.format(Date())} process failed. Caused by: ${e.message}"
                     }
 
                     val sharedPreferences = context.getSharedPreferences("handled_incoming_calls", Context.MODE_PRIVATE)
