@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
                 PERMISSION_READ_STATE)
 
         val filter = IntentFilter("android.intent.action.PHONE_STATE")
-        receiver = PhoneStatReceiver()
+        receiver = PhoneStatReceiver(adapter)
         registerReceiver(receiver, filter)
     }
 

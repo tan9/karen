@@ -8,15 +8,18 @@ import android.content.Intent
 import android.telephony.SmsManager
 import android.telephony.TelephonyManager
 import android.util.Log
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.android.internal.telephony.ITelephony
 import com.example.tang.myapplication.service.ChatroomService
 import java.text.SimpleDateFormat
 import java.util.*
 
-class PhoneStatReceiver : BroadcastReceiver() {
+class PhoneStatReceiver(adapter: ArrayAdapter<Any?>) : BroadcastReceiver() {
 
     private var _TAG = "karen"
+
+    private var adapter = adapter
 
     override fun onReceive(context: Context, intent: Intent) {
         val telephonyManager = context.getSystemService(Service.TELEPHONY_SERVICE) as TelephonyManager
@@ -46,6 +49,9 @@ class PhoneStatReceiver : BroadcastReceiver() {
                     val editor = sharedPreferences.edit()
                     editor.putString(System.currentTimeMillis().toString(), processLogMessage)
                     editor.apply()
+
+                    adapter.insert(processLogMessage, 0)
+                    adapter.notifyDataSetChanged()
 
                     endCall(telephonyManager)
                 }
