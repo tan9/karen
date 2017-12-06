@@ -7,6 +7,7 @@ import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.Response
+import org.json.JSONException
 import org.json.JSONObject
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
@@ -53,14 +54,31 @@ class ChatroomService {
                 message = data!!.obj()["detail"] as String
             }
             if (message == null && response != null) {
-                if (response?.data != null) {
-                    val json = Json(response!!.data.toString(Charsets.UTF_8)).obj()
-                    message = json.optString("detail", json.optString("title", "Failed to create session.")) as String
+                try {
+                    if (response!!.data != null) {
+                        val json = Json(response!!.data.toString(Charsets.UTF_8)).obj()
+                        message = json.optString("detail", json.optString("title", "Failed to create session.")) as String
+                    }
+                } catch (e: JSONException) {
+                    // no valid response data, fall back to following message composition logic
                 }
             }
+            if (message == null) {
+                message = error!!.message
+            }
             throw RuntimeException(message, error)
+
         } else {
-            return data!!.obj()["sessionId"] as String
+            if (data != null && data!!.obj() != null) {
+                if (data!!.obj() != null) {
+                    return data!!.obj()["sessionId"] as String
+                } else {
+                    throw RuntimeException("No response from chat room service.")
+                }
+
+            } else {
+                throw RuntimeException("Failed to contact chat room service.")
+            }
         }
     }
 }
