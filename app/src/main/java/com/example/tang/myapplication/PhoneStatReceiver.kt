@@ -69,6 +69,9 @@ class PhoneStatReceiver(adapter: ArrayAdapter<Any?>) : BroadcastReceiver() {
         if (hostId == null) {
             hostId = manager.subscriberId
         }
+        if (hostId == null || hostId == "") {
+            hostId = "+886922602268"
+        }
         return hostId
     }
 
